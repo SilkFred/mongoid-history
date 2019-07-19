@@ -71,6 +71,9 @@ describe Mongoid::History do
 
     class Foo < Comment
     end
+
+    class Controller
+    end
   end
 
   after :each do
@@ -948,6 +951,15 @@ describe Mongoid::History do
         expect(sausage.history_tracks.last.action).to eq('destroy')
         sausage.history_tracks.last.undo! user
         expect(sausage.reload.flavour).to eq('Guinness')
+      end
+    end
+
+    describe 'controller defined modifier' do
+      it 'should save modifier' do
+        Current.controller = Controller.new
+        allow_any_instance_of(Controller).to receive(:current_user).and_return(user)
+
+        expect(post.history_tracks.last.modifier.id).to eq user.id
       end
     end
 
