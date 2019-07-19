@@ -8,13 +8,13 @@ module Mongoid
       extend ActiveSupport::Concern
 
       included do
-        before_action do |controller|
-          Current.controller = controller
-        end
-
-        # Need to ensure this with around_action
-        after_action do |controller|
-          Current.controller = nil
+        around_action do |controller, block|
+          begin
+            Current.controller = controller
+            block.call
+          ensure
+            Current.controller = nil
+          end
         end
       end
     end
