@@ -235,7 +235,9 @@ module Mongoid
             association_chain: traverse_association_chain,
             scope: related_scope
           }
+
           @history_tracker_attributes[:modifier] = send(modifier_field) if modifier_field
+          @history_tracker_attributes[:modifier] = modifier_from_controller unless @history_tracker_attributes[:modifier]
 
           original, modified = transform_changes(modified_attributes_for_action(action))
 
@@ -254,6 +256,12 @@ module Mongoid
 
         def track_destroy(&block)
           track_history_for_action(:destroy, &block) unless destroyed?
+        end
+
+        def modifier_from_controller
+          return unless Current.controller && Current.controller.respond_to?(Mongoid::History.current_user_method, true)
+
+          Current.controller.send(Mongoid::History.current_user_method)
         end
 
         def clear_trackable_memoization
